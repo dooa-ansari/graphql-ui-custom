@@ -1,6 +1,6 @@
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import Spinner from "react-bootstrap/Spinner";
 import Row from "react-bootstrap/Row";
@@ -18,10 +18,37 @@ const Query =
   "query { head { vars link } results { distinct ordered bindings { distribution{value datatype type xmlLang} title{value datatype type xmlLang} mediaType{value datatype type xmlLang} modified{value datatype type xmlLang} identifier{value datatype type xmlLang} accessURL{value datatype type xmlLang} description{value datatype type xmlLang} geometry{value datatype type xmlLang} license{value datatype type xmlLang} publisherName{value datatype type xmlLang} maintainerEmail{value datatype type xmlLang} } } }";
 
 function App() {
-  const [selectedOption, setSelectedOption] = useState("Animal Parks");
+  const [selectedOption, setSelectedOption] = useState("");
   const [query, setQuery] = useState(Query);
   const [queryResult, setQueryResult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [datasets, setDatasets] = useState([]);
+  const [limitDataSets, setLimitDataSets] = useState(100);
+
+  const getDatasets = async () => {
+    const response = await fetch(
+      "http://127.0.0.1:8000/machine_data/available_graph_iris?limit=" +
+        limitDataSets,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }
+    );
+    const result = await response.json();
+    const datasetResult = result.data.map((item) => item.graph.value);
+    setDatasets(datasetResult);
+  };
+  const setNewLimit = async (limit) => {
+    setLimitDataSets(limit)
+    getDatasets()
+  };
+
+  useEffect(() => {
+    getDatasets();
+  }, []);
 
   const runGraphQlQuery = async () => {
     const response = await fetch("http://127.0.0.1:8000/graphql/", {
@@ -92,14 +119,50 @@ function App() {
               title="Datasets Selections"
               onSelect={handleSelect}
             >
-              <Dropdown.Item eventKey="Animal Parks">
-                Animal Parks
-              </Dropdown.Item>
-              <Dropdown.Item eventKey="Parking ticket machines">
-                Parking ticket machines
-              </Dropdown.Item>
-              <Dropdown.Item eventKey="Schools">Schools</Dropdown.Item>
+              {datasets.map((dataset) => {
+                return (
+                  <Dropdown.Item eventKey={dataset}>{dataset}</Dropdown.Item>
+                );
+              })}
             </DropdownButton>
+            <div>
+              <h5>Current Limit Datasets: {limitDataSets}</h5>
+              <ButtonGroup>
+                <Button
+                  variant={
+                    limitDataSets === 50 ? "primary" : "outline-primary"
+                  }
+                  onClick={() => setNewLimit(50)}
+                >
+                  50
+                </Button>
+                <Button
+                  variant={
+                    limitDataSets === 100 ? "primary" : "outline-primary"
+                  }
+                  onClick={() => setNewLimit(100)}
+                >
+                  100
+                </Button>
+                <Button
+                  variant={
+                    limitDataSets === 200 ? "primary" : "outline-primary"
+                  }
+                  onClick={() => setNewLimit(200)}
+                >
+                  200
+                </Button>
+                <Button
+                  variant={
+                    limitDataSets === 300 ? "primary" : "outline-primary"
+                  }
+                  onClick={() => setNewLimit(300)}
+                >
+                  300
+                </Button>
+              </ButtonGroup>
+            </div>
+           
             {selectedOption && (
               <span style={{ marginTop: "10px" }}>
                 Current Dataset: {selectedOption}
