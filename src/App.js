@@ -39,11 +39,12 @@ function App() {
     );
     const result = await response.json();
     const datasetResult = result.data.map((item) => item.graph.value);
+    datasetResult.push("http://data.europa.eu/88u/dataset/https-portal-chemnitz-opendata-arcgis-com-datasets-chemnitz-tierparks")
     setDatasets(datasetResult);
   };
   const setNewLimit = async (limit) => {
-    setLimitDataSets(limit)
-    getDatasets()
+    setLimitDataSets(limit);
+    getDatasets();
   };
 
   useEffect(() => {
@@ -60,7 +61,6 @@ function App() {
       body: JSON.stringify({ query }),
     });
     const result = await response.json();
-    //const formattedData = JSON.stringify(result, null, 2).replace(/\\/g, "");
     setQueryResult(result);
     console.log(result);
   };
@@ -129,9 +129,7 @@ function App() {
               <h5>Current Limit Datasets: {limitDataSets}</h5>
               <ButtonGroup>
                 <Button
-                  variant={
-                    limitDataSets === 50 ? "primary" : "outline-primary"
-                  }
+                  variant={limitDataSets === 50 ? "primary" : "outline-primary"}
                   onClick={() => setNewLimit(50)}
                 >
                   50
@@ -162,7 +160,7 @@ function App() {
                 </Button>
               </ButtonGroup>
             </div>
-           
+
             {selectedOption && (
               <span style={{ marginTop: "10px" }}>
                 Current Dataset: {selectedOption}
@@ -186,15 +184,16 @@ function App() {
                 <Col>
                   <h3>Graphql Query</h3>
                 </Col>
-                <Col>
-                  <ButtonGroup className="mb-3 d-flex justify-content-end">
-                    <Button variant="primary">Copy</Button>
-                    <Button variant="success">Edit</Button>
-                  </ButtonGroup>
-                </Col>
+               
               </Row>
               <Form.Group className="mb-3" controlId="graphqlquery">
-                <Form.Control as="textarea" rows={15} defaultValue={query} />
+                <Form.Control
+                  value={query} 
+                  onChange={(event) => setQuery(event.target.value)}
+                  as="textarea"
+                  rows={15}
+                  defaultValue={query}
+                />
               </Form.Group>
             </div>
 
@@ -215,23 +214,15 @@ function App() {
               <Col>
                 <h3>Results</h3>
               </Col>
-              <Col>
-                <ButtonGroup className="mb-3 d-flex justify-content-end">
-                  <Button variant="primary">Copy</Button>
-                </ButtonGroup>
-              </Col>
+             
             </Row>
             <Form.Group className="mb-3" controlId="resultsquery">
-              {/* <Form.Control
-                defaultValue={queryResult}
-                as="textarea"
-                rows={15}
-              /> */}
+            
               <ReactJson
-                src={queryResult} // Pass JSON object directly
-                theme="monokai" // Dark mode styling
-                collapsed={false} // Expand all by default
-                enableClipboard={true} // Copy feature
+                src={queryResult} 
+                theme="monokai" 
+                collapsed={false} 
+                enableClipboard={true}
                 displayDataTypes={false}
               />
               ;
